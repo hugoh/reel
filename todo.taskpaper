@@ -1,0 +1,6 @@
+TODOs:
+- Add self-update function to curl from github repo
+- Add documentation for installation
+- Add comparison to fisher and scuba
+- Promote on reddit or Twitter
+- Add bumpversion
