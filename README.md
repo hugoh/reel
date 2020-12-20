@@ -40,7 +40,7 @@ function load_plugin -a plugin
     if test -d "$plugin/functions"; and not contains "$plugin/functions" $fish_function_path
         set fish_function_path "$plugin/functions" $fish_function_path
     end
-    for f in "$plugin/conf.d"/*
+    for f in "$plugin/conf.d"/*.fish
         command source "$f"
     end
 end
