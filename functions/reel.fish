@@ -2,24 +2,21 @@
 # Copyright mattmc3, 2020-2021
 # MIT license, https://opensource.org/licenses/MIT
 
-set -g reel_version 0.1.0
+set -g reel_version 1.0.0
 set -q reel_plugins_path; or set -g reel_plugins_path $HOME/.config/fish/plugins
 set -q reel_git_default_domain; or set -g reel_git_default_domain "github.com"
 
 function __reel_usage
-    set -l b (set_color --bold)
-    set -l n (set_color normal)
-
     echo "reel - manage your fish plugins"
     echo ""
     echo "Comands:"
-    echo "$b ls$n                 List installed plugins"
-    echo "$b in$n <plugins...>    Initialize plugins, cloning from git if necessary"
-    echo "$b rm$n <plugins...>    Remove an existing plugin"
-    echo "$b up$n <plugins...>    Update the specified plugins"
-    echo "$b up$n                 Update all plugins"
-    echo "$b source$n <paths...>  Source a plugin from a directory"
-    echo "$b clone$n <plugin>     git clone the specified plugin"
+    echo "ls               List installed plugins"
+    echo "in <plugins...>  Initialize plugins by cloning if neccesary, and loading"
+    echo "rm <plugins...>  Remove an existing plugin"
+    echo "up <plugins...>  Update the specified plugins"
+    echo "up               Update all plugins"
+    echo "load <paths...>  Load a plugin from a directory"
+    echo "clone <plugin>   git clone the specified plugin"
     echo ""
     echo "Options:"
     echo "       -v or --version  Print version"
@@ -71,17 +68,27 @@ function __reel_clone -a plugin
     command git clone --recursive --depth 1 $urlparts[1] $plugindir
 end
 
-function __reel_source -a plugin_dir
-    if not test -d "$plugin_dir"
-        echo "plugin not found: $plugin_dir" >&2 && return 1
+function __reel_load
+    load_plugin $argv
+end
+
+function load_plugin -a plugin
+    if test -d "$plugin"
+        set plugin (realpath "$plugin")
+    else if test -d "$HOME/.config/fish/$plugin"
+        set plugin (realpath "$HOME/.config/fish/$plugin")
+    else
+        echo "plugin not found: $plugin" >&2 && return 1
     end
-    if test -d "$plugin_dir/completions"; and not contains "$plugin_dir/completions" $fish_complete_path
-        set fish_complete_path "$plugin_dir/completions" $fish_complete_path
+
+    # handle the plugin's functions, completions, and conf.d directories
+    if test -d "$plugin/completions"; and not contains "$plugin/completions" $fish_complete_path
+        set fish_complete_path "$plugin/completions" $fish_complete_path
     end
-    if test -d "$plugin_dir/functions"; and not contains "$plugin_dir/functions" $fish_function_path
-        set fish_function_path "$plugin_dir/functions" $fish_function_path
+    if test -d "$plugin/functions"; and not contains "$plugin/functions" $fish_function_path
+        set fish_function_path "$plugin/functions" $fish_function_path
     end
-    for f in "$plugin_dir/conf.d"/*
+    for f in "$plugin/conf.d"/*
         source "$f"
     end
 end
@@ -90,7 +97,7 @@ function __reel_in -a plugin
     if not test -d "$reel_plugins_path/$plugin"
         __reel_clone "$plugin"
     end
-    __reel_source "$reel_plugins_path/$plugin"
+    __reel_load "$reel_plugins_path/$plugin"
 end
 
 function __reel_rm
@@ -136,7 +143,7 @@ function reel -a cmd --description 'Manage your fish plugins'
             for p in $argv
                 __reel_up $p
             end
-        case in init initialize install clone source rm remove
+        case in init initialize install clone load rm remove
             if test (count $argv) -eq 0
                 echo "expecting a plugin parameter" >&2 && return 1
             end
