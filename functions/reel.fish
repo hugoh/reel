@@ -2,7 +2,7 @@
 # Copyright mattmc3, 2020-2021
 # MIT license, https://opensource.org/licenses/MIT
 
-set -g reel_version 1.0.1
+set -g reel_version 1.0.2
 set -q reel_plugins_path; or set -g reel_plugins_path $__fish_config_dir/plugins
 set -q reel_git_default_domain; or set -g reel_git_default_domain "github.com"
 
