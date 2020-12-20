@@ -2,7 +2,7 @@
 # Copyright mattmc3, 2020-2021
 # MIT license, https://opensource.org/licenses/MIT
 
-set -g reel_version 1.0.0
+set -g reel_version 1.0.1
 set -q reel_plugins_path; or set -g reel_plugins_path $HOME/.config/fish/plugins
 set -q reel_git_default_domain; or set -g reel_git_default_domain "github.com"
 
@@ -68,20 +68,18 @@ function __reel_clone -a plugin
     command git clone --recursive --depth 1 $urlparts[1] $plugindir
 end
 
-function __reel_load
-    load_plugin $argv
-end
-
-function load_plugin -a plugin
+function __reel_load -a plugin
     if test -d "$plugin"
         set plugin (realpath "$plugin")
-    else if test -d "$HOME/.config/fish/$plugin"
-        set plugin (realpath "$HOME/.config/fish/$plugin")
+    else if test -d "$reel_plugins_path/$plugin"
+        set plugin (realpath "$reel_plugins_path/$plugin")
     else
         echo "plugin not found: $plugin" >&2 && return 1
     end
+    load_plugin $plugin
+end
 
-    # handle the plugin's functions, completions, and conf.d directories
+function load_plugin -a plugin
     if test -d "$plugin/completions"; and not contains "$plugin/completions" $fish_complete_path
         set fish_complete_path "$plugin/completions" $fish_complete_path
     end
@@ -89,7 +87,7 @@ function load_plugin -a plugin
         set fish_function_path "$plugin/functions" $fish_function_path
     end
     for f in "$plugin/conf.d"/*
-        source "$f"
+        command source "$f"
     end
 end
 

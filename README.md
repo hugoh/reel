@@ -30,19 +30,10 @@ Let me show you what I mean.
 
 The way Reel works is that it stores any plugins you clone from git in the `~/.config/fish/plugins` folder.
 It then uses fish's built-in `$fish_function_path` and `$fish_complete_path` to tell fish where to find the plugin's key files.
-This 20 line snippet from Reel is the entirety of what you'd need to load your own plugins without using a "plugin manager".
+This short snippet from Reel is the entirety of what you'd need to load your own plugins without using a "plugin manager".
 
 ```fish
 function load_plugin -a plugin
-    if test -d "$plugin"
-        set plugin (realpath "$plugin")
-    else if test -d "$HOME/.config/fish/$plugin"
-        set plugin (realpath "$HOME/.config/fish/$plugin")
-    else
-        echo "plugin not found: $plugin" >&2 && return 1
-    end
-
-    # handle the plugin's functions, completions, and conf.d directories
     if test -d "$plugin/completions"; and not contains "$plugin/completions" $fish_complete_path
         set fish_complete_path "$plugin/completions" $fish_complete_path
     end
@@ -50,7 +41,7 @@ function load_plugin -a plugin
         set fish_function_path "$plugin/functions" $fish_function_path
     end
     for f in "$plugin/conf.d"/*
-        source "$f"
+        command source "$f"
     end
 end
 ```
