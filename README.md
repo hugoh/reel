@@ -14,8 +14,8 @@
 TLDR; Just grab Reel with a simple git command and copy a file to your fish config.
 
 ```shell
-git clone --depth 1 https://github.com/mattmc3/reel ~/.config/fish/plugins/mattmc3/reel
-cp ~/.config/fish/plugins/mattmc3/reel/templates/reel.fish ~/.config/fish/conf.d
+git clone --depth 1 https://github.com/mattmc3/reel $__fish_config_dir/plugins/mattmc3/reel
+cp $__fish_config_dir/plugins/mattmc3/reel/templates/reel.fish $__fish_config_dir/conf.d
 ```
 
 ## Introduction
