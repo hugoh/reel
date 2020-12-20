@@ -87,7 +87,7 @@ function load_plugin -a plugin
         set fish_function_path "$plugin/functions" $fish_function_path
     end
     for f in "$plugin/conf.d"/*.fish
-        command source "$f"
+        builtin source "$f"
     end
 end
 
