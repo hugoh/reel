@@ -5,14 +5,14 @@ set thisdir (dirname $thisfile)
 source $thisdir/includes/setup_teardown.fish
 
 setup
-reel list 2>&1 >/dev/null
+reel list >/dev/null 2>&1
 @test "'reel ls' command succeeds with no plugins installed" $status -eq 0
 set pluginlist (reel ls)
 @test "'reel ls' lists 0 plugins" (count $pluginlist) -eq 0
 teardown
 
 setup "fakes"
-reel list 2>&1 >/dev/null
+reel list >/dev/null 2>&1
 @test "'reel ls' command succeeds" $status -eq 0
 set pluginlist (reel ls)
 @test "'reel ls' lists 3 fake plugins" (count $pluginlist) -eq 3

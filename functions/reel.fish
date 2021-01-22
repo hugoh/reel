@@ -24,7 +24,7 @@ function __reel_usage
 end
 
 function __reel_ls
-    for p in $reel_plugins_path/*/*
+    for p in $reel_plugins_path/*
         string replace -a "$reel_plugins_path/" "" $p
     end
 end
@@ -98,33 +98,26 @@ function __reel_in -a plugin
     __reel_load "$reel_plugins_path/$plugin"
 end
 
-function __reel_rm
+function __reel_rm -a plugin
     if test (count $argv) -eq 0
-        echo "plugin argument expected" >&2 && return 1
+        echo >&2 "reel: plugin argument expected" && return 1
     end
-    set plugin_path "$reel_plugins_path/$argv"
+    set plugin_path "$reel_plugins_path/$plugin"
     if not test -d "$plugin_path"
-        echo "plugin not found: $argv" >&2 && return 1
-    else if not __reel_can_rm "$plugin_path"
-        echo "plugin path not removable: $argv" >&2 && return 1
+        echo >&2 "reel: plugin not found '$plugin'" && return 1
+    else if not __reel_is_safe_rm "$plugin_path"
+        echo >&2 "reel: plugin path not safe to remove '$plugin'" && return 1
     else
         echo "removing $plugin_path..."
         command rm -rf "$plugin_path"
     end
 end
 
-function __reel_can_rm
-    # do a small set of checks to make sure someone isn't being evil with
-    # relative paths or accidentally gets burnt by a typo
-    set -l abs_pluginsdir (realpath "$reel_plugins_path")
-    set -l abs_pluginpath (realpath "$argv")
-
-    set -l path (realpath "$argv")
-    if not string match -q -- "$abs_pluginsdir/*/*" "$abs_pluginpath"
-        return 1
-    else if not test -d "$abs_pluginpath/.git"
-        return 1
-    end
+function __reel_is_safe_rm -a plugin_path
+    # quick check to make sure no one is being evil ../ relative paths
+    set plugin_path (realpath "$plugin_path")
+    set -l reeldir (realpath "$reel_plugins_path")
+    string match -q -- "$reeldir/*" "$plugin_path" || return 1
 end
 
 function reel -a cmd --description 'Manage your fish plugins'
@@ -134,6 +127,7 @@ function reel -a cmd --description 'Manage your fish plugins'
             echo "reel, version $reel_version"
         case "" -h --help
             __reel_usage
+            test "$cmd" != "" || return 1
         case ls list
             __reel_ls
         case up update
@@ -141,16 +135,14 @@ function reel -a cmd --description 'Manage your fish plugins'
             for p in $argv
                 __reel_up $p
             end
-        case in init initialize install clone load rm remove
+        case in clone load rm
             if test (count $argv) -eq 0
-                echo "expecting a plugin parameter" >&2 && return 1
+                echo >&2 "reel: plugin argument expected" && return 1
             end
-            contains $cmd install init initialize; and set cmd in
-            contains $cmd remove; and set cmd rm
             for p in $argv
                 __reel_$cmd $p
             end
         case \*
-            echo "reel: Unknown flag or command: \"$cmd\" (see `reel -h`)" >&2 && return 1
+            echo >&2 "reel: unknown flag or command \"$cmd\" (see `reel -h`)" && return 1
     end
 end
