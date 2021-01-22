@@ -1,13 +1,15 @@
 .DEFAULT_GOAL := help
 
+.PHONY: test
+test:
+	./bin/runtests | ./bin/colorizetap
+
 .PHONY: pretty
 pretty:
 	fish_indent -w ./**/*.fish
 
 .PHONY: help
 help:
-	@echo "help"
-	@echo "    shows this message"
-	@echo ""
-	@echo "pretty"
-	@echo "    Run fish_indent against all fish files. "
+	@echo "help    show this message"
+	@echo "test    run tests"
+	@echo "pretty  Run fish_indent against all fish files. "
