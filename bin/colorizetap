@@ -1,5 +1,6 @@
-#!/usr/bin/env awk -f
+#!/usr/bin/env -S awk -f
 
+# https://testanything.org
 BEGIN {
     CYAN="\033[0;36m"
     GREEN="\033[0;32m"
@@ -10,8 +11,8 @@ BEGIN {
 }
 /^ok /      { print GREEN $0 NORMAL; next }
 /^not ok /  { print RED $0 NORMAL; next }
-/^\# pass / { print BRIGHTGREEN $0 NORMAL; next }
 /^\# ok$/   { print BRIGHTGREEN $0 NORMAL; next }
+/^\# pass / { print BRIGHTGREEN $0 NORMAL; next }
 /^\# fail / { print BRIGHTRED $0 NORMAL; next }
 /^\#/       { print CYAN $0 NORMAL; next }
             { print $0 }
